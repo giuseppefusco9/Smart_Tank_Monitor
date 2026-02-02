@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tank Monitoring Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>
+                    <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                    </svg>
+                    Smart Tank Monitoring System
+                </h1>
+                <p class="subtitle">Dashboard Subsystem (DBS)</p>
+            </div>
+            <div class="connection-status" id="connectionStatus">
+                <span class="status-dot"></span>
+                <span class="status-text">Connecting...</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- System Status Card -->
+            <div class="card status-card">
+                <div class="card-header">
+                    <h2>System Status</h2>
+                    <span class="mode-badge" id="modeBadge">AUTOMATIC</span>
+                </div>
+                <div class="card-body">
+                    <div class="status-grid">
+                        <!-- Current Water Level -->
+                        <div class="status-item">
+                            <div class="status-label">Current Water Level</div>
+                            <div class="status-value" id="currentLevel">
+                                <span class="value-number">--</span>
+                                <span class="value-unit">cm</span>
+                            </div>
+                        </div>
+
+                        <!-- Valve Opening -->
+                        <div class="status-item">
+                            <div class="status-label">Valve Opening</div>
+                            <div class="status-value" id="valveOpening">
+                                <span class="value-number">--</span>
+                                <span class="value-unit">%</span>
+                            </div>
+                            <div class="valve-indicator">
+                                <div class="valve-bar">
+                                    <div class="valve-fill" id="valveFill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thresholds Display -->
+                    <div class="thresholds">
+                        <div class="threshold-item threshold-l1">
+                            <span class="threshold-label">L1 Threshold</span>
+                            <span class="threshold-value" id="l1Threshold">30 cm</span>
+                        </div>
+                        <div class="threshold-item threshold-l2">
+                            <span class="threshold-label">L2 Threshold</span>
+                            <span class="threshold-value" id="l2Threshold">50 cm</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Water Level Chart -->
+            <div class="card chart-card">
+                <div class="card-header">
+                    <h2>Water Level History</h2>
+                    <div class="chart-info">
+                        <span id="measurementCount">0</span> measurements
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="levelChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="card control-card">
+                <div class="card-header">
+                    <h2>Control Panel</h2>
+                </div>
+                <div class="card-body">
+                    <!-- Mode Control -->
+                    <div class="control-section">
+                        <div class="control-label">
+                            <span>System Mode</span>
+                            <span class="control-hint">Switch between automatic and manual control</span>
+                        </div>
+                        <div class="mode-toggle">
+                            <button class="mode-btn" id="autoBtn" data-mode="AUTOMATIC">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                                Automatic
+                            </button>
+                            <button class="mode-btn" id="manualBtn" data-mode="MANUAL">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                </svg>
+                                Manual
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Manual Valve Control -->
+                    <div class="control-section" id="manualControlSection">
+                        <div class="control-label">
+                            <span>Manual Valve Control</span>
+                            <span class="control-hint">Adjust valve opening percentage (0-100%)</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="valveSlider" class="valve-slider" min="0" max="100" value="0" disabled>
+                            <div class="slider-labels">
+                                <span>0%</span>
+                                <span id="sliderValue">0%</span>
+                                <span>100%</span>
+                            </div>
+                        </div>
+                        <button class="apply-btn" id="applyValveBtn" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                            </svg>
+                            Apply Valve Setting
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Info -->
+            <div class="card info-card">
+                <div class="card-header">
+                    <h2>System Information</h2>
+                </div>
+                <div class="card-body">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Last Update</div>
+                            <div class="info-value" id="lastUpdate">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">CUS API</div>
+                            <div class="info-value" id="apiUrl">http://localhost:5000</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Update Interval</div>
+                            <div class="info-value">2 seconds</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Auto Refresh</div>
+                            <div class="info-value">
+                                <span class="status-indicator active"></span>
+                                Active
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2026 Smart Tank Monitoring System - University of Bologna</p>
+        </footer>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast">
+        <div class="toast-content">
+            <span class="toast-icon"></span>
+            <span class="toast-message"></span>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/chart.js"></script>
+    <script src="js/controls.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

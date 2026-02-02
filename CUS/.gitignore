@@ -1,0 +1,28 @@
+# Ignore Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment (uv and traditional)
+.venv/
+venv/
+env/
+ENV/
+
+# UV specific
+uv.lock
+.python-version
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Logs
+*.log
