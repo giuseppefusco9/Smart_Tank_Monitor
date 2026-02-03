@@ -2,8 +2,8 @@
 #define __CONFIG__
 
 // ===== WiFi Configuration =====
-#define WIFI_SSID "Solchiaro"          // Replace with your WiFi SSID
-#define WIFI_PASSWORD "Solchiaro@01"  // Replace with your WiFi password
+#define WIFI_SSID ""          // Replace with your WiFi SSID
+#define WIFI_PASSWORD ""  // Replace with your WiFi password
 #define WIFI_TIMEOUT 20000                   // WiFi connection timeout (ms)
 
 // ===== MQTT Configuration =====
