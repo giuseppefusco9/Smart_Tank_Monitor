@@ -1,217 +1,220 @@
 #include "WCSTask.h"
-#include "Arduino.h"
-#include "kernel/MsgService.h"
+#include "config.h"
 #include "kernel/logger.h"
 
-#define UNCONECTED_MSG "cus->wcs-st-unconnected"
-#define AUTOMATIC_MSG "cus->wcs-st-automatic"
-#define REMOTE_MANUAL_MSG "cus->wcs-st-remote-manual"
-#define LOCAL_MANUAL_MSG "cus->wcs-st-local-manual"
-#define CONTROL_MSG "cus->wcs-op-"
+WCSTask::WCSTask(ServoMotorImpl* pServo, Lcd* pLcd, ButtonImpl* pButton, Potentiometer* pPot, SerialComm* pSerial)
+    : state(AUTOMATIC), justEntered(true),
+      pServo(pServo), pLcd(pLcd), pButton(pButton), pPot(pPot), pSerial(pSerial),
+      lastValvePercentage(-1), lastPotUpdate(0), lastSerialCheck(0) {}
 
-#define LOCAL_MANUAL_SEND_MSG "wcs->cus-st-local-manual"
-#define AUTOMATIC_SEND_MSG "wcs->cus-st-automatic"
-#define CONTROL_SEND_MSG "wcs->cus-op-"
-
-#define POTENTIOMETER_MIN 0
-#define POTENTIOMETER_MAX 1023
-
-#define PERCENTAGE_MIN 0
-#define PERCENTAGE_MAX 100
-
-class AutomaticPattern : public Pattern {
-public:
-  boolean match(const Msg& m) override {
-    return m.getContent() == AUTOMATIC_MSG;
-  }
-};
-
-class UnconectedPattern : public Pattern {
-public:
-  boolean match(const Msg& m) override {
-    return m.getContent() == UNCONECTED_MSG;
-  }
-};
-
-class RemotePattern : public Pattern {
-public:
-  boolean match(const Msg& m) override {
-    return m.getContent() == REMOTE_MANUAL_MSG;
-  }
-};
-
-class LocalPattern : public Pattern {
-public:
-  boolean match(const Msg& m) override {
-    return m.getContent() == LOCAL_MANUAL_MSG;
-  }
-};
-
-class ControlPattern : public Pattern {
-public:
-  boolean match(const Msg& m) override {
-    return m.getContent().startsWith(CONTROL_MSG);
-  }
-};
-
-WCSTask::WCSTask(ServoMotor* pServo, Lcd *pLcd, button *pButton, Potentiometer* pPot) : 
-    pServo(pServo), pLcd(pLcd), pButton(pButton), pPot(pPot)
-{
-    this->setState(AUTOMATIC);    
+void WCSTask::init(int period) {
+    Task::init(period);
+    Logger.log("WCSTask initialized");
+    
+    // Initialize display
+    updateLCDDisplay("STARTING", 0);
+    
+    // Initialize servo to closed position
+    pServo->setPosition(0);
+    
+    // Start in AUTOMATIC mode
+    setState(AUTOMATIC);
 }
 
-void WCSTask::tick(){
-   switch(state){
-     case AUTOMATIC:
-        if (checkAndSetJustEntered())
-        {
-            Logger.log(F("WCSTask:AUTOMATIC"));
-            pLcd->writeModeMessage("AUTOMATIC");
-        }
-        this->checkUnconnectedMessage();
-        this->checkControlMessage();    
-        this->checkRemoteMessage();
-        this->checkLocalMessage();
-
-        break;
-     case LOCAL_MANUAL:
-        if (checkAndSetJustEntered())
-        {
-            this->lastAngle = -1;
-            Logger.log(F("WCSTask:LOCAL_MANUAL"));
-            pLcd->writeModeMessage("LOCAL MANUAL");
-        }
-
-        
-        this->checkUnconnectedMessage();
-        this->checkAutomaticMessage();
-
-        if(pButton->isPressed())
-        {
-            MsgService.sendMsg(AUTOMATIC_SEND_MSG);  
-        } 
-
-        this->processPotentiometerInput();
-
-        break;
-     case REMOTE_MANUAL:
-        {
-                if (checkAndSetJustEntered())
-            {
-                Logger.log(F("WCSTask:REMOTE_MANUAL"));
-                pLcd->writeModeMessage("REMOTE MANUAL");
-            }
-
-            this->checkUnconnectedMessage();
-            this->checkAutomaticMessage();
-            this->checkControlMessage();
+void WCSTask::tick() {
+    unsigned long now = millis();
     
-        break;
-        }
-        break;
-     case UNCONECTED:
-       {
-            if (checkAndSetJustEntered())
-            {
-                Logger.log(F("WCSTask:UNCONECTED"));
-                pLcd->writeModeMessage("UNCONECTED");
-            }
-
-            this->checkAutomaticMessage();
-
+    // Check serial messages periodically
+    if (now - lastSerialCheck >= SERIAL_CHECK_INTERVAL) {
+        pSerial->update();
+        processSerialMessages();
+        lastSerialCheck = now;
+    }
+    
+    // Check button press
+    checkButtonPress();
+    
+    // Execute state-specific logic
+    switch (state) {
+        case AUTOMATIC:
+            handleAutomaticMode();
             break;
-        }   
-    default:
-        break;
+            
+        case MANUAL:
+            handleManualMode();
+            break;
+            
+        case UNCONNECTED:
+            handleUnconnectedMode();
+            break;
+    }
+}
+
+void WCSTask::handleAutomaticMode() {
+    if (checkAndSetJustEntered()) {
+        Logger.log("State: AUTOMATIC");
+        updateLCDDisplay("AUTOMATIC", lastValvePercentage);
+        
+        // Notify CUS of mode change
+        pSerial->sendMessage("mode", "AUTOMATIC");
+    }
     
-   }
+    // In AUTOMATIC mode, we just wait for valve commands from CUS
+    // The valve is controlled via serial messages
 }
 
-void WCSTask::checkUnconnectedMessage(){
-    static UnconectedPattern unconected;
-    if(MsgService.isMsgAvailable(unconected))
-    {
-        Msg* msg = MsgService.receiveMsg(unconected);
-        delete msg;
-        this->setState(UNCONECTED);
+void WCSTask::handleManualMode() {
+    if (checkAndSetJustEntered()) {
+        Logger.log("State: MANUAL");
+        updateLCDDisplay("MANUAL", lastValvePercentage);
+        
+        // Notify CUS of mode change
+        pSerial->sendMessage("mode", "MANUAL");
+    }
+    
+    // Process potentiometer input
+    unsigned long now = millis();
+    if (now - lastPotUpdate >= MANUAL_UPDATE_INTERVAL) {
+        processPotentiometerInput();
+        lastPotUpdate = now;
     }
 }
 
-void WCSTask::checkAutomaticMessage(){
-    static AutomaticPattern automatic;
-    if(MsgService.isMsgAvailable(automatic))
-    {
-        Msg* msg = MsgService.receiveMsg(automatic);
-        delete msg;
-        this->setState(AUTOMATIC);
+void WCSTask::handleUnconnectedMode() {
+    if (checkAndSetJustEntered()) {
+        Logger.log("State: UNCONNECTED");
+        updateLCDDisplay("UNCONNECTED", 0);
+        
+        // Close valve for safety
+        pServo->setPosition(0);
+        lastValvePercentage = 0;
+    }
+    
+    // Wait for CUS to send a display update (reconnection signal)
+    // State will change when CUS sends a message
+}
+
+void WCSTask::processSerialMessages() {
+    String type, value;
+    
+    while (pSerial->messageAvailable()) {
+        if (pSerial->receiveMessage(type, value)) {
+            Logger.log("Received: " + type + " = " + value);
+            
+            if (type == "valve") {
+                handleValveCommand(value);
+            } else if (type == "display") {
+                handleDisplayUpdate(value);
+            }
+        }
     }
 }
 
-void WCSTask::checkControlMessage(){
-    static ControlPattern control;
-    if(MsgService.isMsgAvailable(control))
-    {
-        Logger.log(F("Servo angle is chaning"));
-        Msg* msg = MsgService.receiveMsg(control);
-        int perc = this->msgMotorPerc(msg->getContent());
-        int angle = map(perc, PERCENTAGE_MIN, PERCENTAGE_MAX, 0, 180);
-        this->pServo->setPosition(angle);
-        this->pLcd->writePercMessage(String(perc));
-        delete msg;
+void WCSTask::handleValveCommand(const String& value) {
+    int percentage = value.toInt();
+    
+    // Validate percentage
+    if (percentage < VALVE_MIN || percentage > VALVE_MAX) {
+        Logger.log("Invalid valve percentage: " + String(percentage));
+        return;
+    }
+    
+    // Set servo angle
+    int angle = mapPercentageToAngle(percentage);
+    pServo->setPosition(angle);
+    lastValvePercentage = percentage;
+    
+    // Update LCD
+    if (state == AUTOMATIC) {
+        updateLCDDisplay("AUTOMATIC", percentage);
+    }
+    
+    Logger.log("Valve set to " + String(percentage) + "% (angle: " + String(angle) + ")");
+}
+
+void WCSTask::handleDisplayUpdate(const String& value) {
+    // Parse display update message
+    // Expected format from CUS: JSON with mode and valve fields
+    // For simplicity, we'll parse it as a mode name
+    
+    if (value == "AUTOMATIC") {
+        if (state == UNCONNECTED) {
+            setState(AUTOMATIC);
+        }
+    } else if (value == "MANUAL") {
+        if (state == UNCONNECTED) {
+            setState(MANUAL);
+        }
+    } else if (value == "UNCONNECTED") {
+        setState(UNCONNECTED);
     }
 }
 
-void WCSTask::checkRemoteMessage(){
-    static RemotePattern remote;
-    if(MsgService.isMsgAvailable(remote))
-    {
-        Msg* msg = MsgService.receiveMsg(remote);
-        delete msg;
-        this->setState(REMOTE_MANUAL);
+void WCSTask::checkButtonPress() {
+    if (pButton->isPressed()) {
+        Logger.log("Button pressed!");
+        
+        // Toggle between AUTOMATIC and MANUAL
+        if (state == AUTOMATIC) {
+            setState(MANUAL);
+        } else if (state == MANUAL) {
+            setState(AUTOMATIC);
+        }
+        // Ignore button press in UNCONNECTED state
+        
+        // Debounce delay
+        delay(200);
     }
 }
 
-void WCSTask::checkLocalMessage(){
-    static LocalPattern local;
-    if(MsgService.isMsgAvailable(local))
-    {
-        Msg* msg = MsgService.receiveMsg(local);
-        delete msg;
-        this->setState(LOCAL_MANUAL);
-    }
-}
-
-void WCSTask::processPotentiometerInput(){
+void WCSTask::processPotentiometerInput() {
     pPot->sync();
     int potValue = pPot->getValue();
-    int angle = map(potValue, POTENTIOMETER_MIN, POTENTIOMETER_MAX, 0, 180);
-    String percentageString = String(map(angle, 0, 180, 0, 100));
-    pServo->setPosition(angle);
-    String angleString = String(angle);
-    if (this->lastAngle != angle) {
-        this->lastAngle = angle;
-        pLcd->writePercMessage(percentageString);
+    
+    // Map potentiometer to percentage
+    int percentage = mapPotToPercentage(potValue);
+    
+    // Only update if changed
+    if (percentage != lastValvePercentage) {
+        // Set servo
+        int angle = mapPercentageToAngle(percentage);
+        pServo->setPosition(angle);
+        lastValvePercentage = percentage;
+        
+        // Update LCD
+        updateLCDDisplay("MANUAL", percentage);
+        
+        // Send to CUS
+        pSerial->sendMessage("valve", percentage);
+        
+        Logger.log("Manual valve: " + String(percentage) + "%");
     }
-    MsgService.sendMsg(CONTROL_SEND_MSG+percentageString);
 }
 
-void WCSTask::setState(WCSState s)
-{
-    state = s;
+void WCSTask::setState(WCSState newState) {
+    state = newState;
     justEntered = true;
 }
 
-bool WCSTask::checkAndSetJustEntered()
-{
-    bool bak = justEntered;
-    if (justEntered)
-    {
-        justEntered = false;
-    }
-    return bak;
+bool WCSTask::checkAndSetJustEntered() {
+    bool wasJustEntered = justEntered;
+    justEntered = false;
+    return wasJustEntered;
 }
 
-int WCSTask::msgMotorPerc(String m)
-{
-    return m.substring(String(CONTROL_MSG).length()).toInt();
+int WCSTask::mapPercentageToAngle(int percentage) {
+    return map(percentage, VALVE_MIN, VALVE_MAX, SERVO_MIN_ANGLE, SERVO_MAX_ANGLE);
+}
+
+int WCSTask::mapPotToPercentage(int potValue) {
+    return map(potValue, POT_MIN, POT_MAX, VALVE_MIN, VALVE_MAX);
+}
+
+void WCSTask::updateLCDDisplay(const String& mode, int valve) {
+    // Line 1: Mode
+    pLcd->writeModeMessage(mode);
+    
+    // Line 2: Valve percentage
+    String valveStr = "Valve: " + String(valve) + "%";
+    pLcd->writePercMessage(valveStr);
 }

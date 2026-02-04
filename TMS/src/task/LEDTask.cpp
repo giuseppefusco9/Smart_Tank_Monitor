@@ -17,6 +17,14 @@ void LEDTask::tick() {
   TMSState currentState = stateManager->getState();
   unsigned long now = millis();
 
+  // Debug: Print state periodically
+  static unsigned long lastDebug = 0;
+  if (now - lastDebug >= 5000) {
+    DEBUG_PRINT("[LED] State: ");
+    DEBUG_PRINTLN(stateToString(currentState));
+    lastDebug = now;
+  }
+
   switch (currentState) {
     case INIT:
       if (now - lastBlinkTime >= LED_BLINK_PERIOD) {
@@ -45,6 +53,7 @@ void LEDTask::tick() {
     case MONITORING:
       greenLed->switchOn();
       redLed->switchOff();
+      break;
       break;
 
     case DISCONNECTED:

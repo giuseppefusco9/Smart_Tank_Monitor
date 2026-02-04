@@ -2,36 +2,71 @@
 #define __WCS_TASK__
 
 #include "kernel/Task.h"
-#include "model/HWPlatform.h"
+#include "kernel/SerialComm.h"
+#include "devices/servoMotorImpl.h"
+#include "devices/lcd.h"
+#include "devices/buttonimpl.h"
+#include "devices/pot.h"
+#include <Arduino.h>
 
-class WCSTask: public Task {
+/**
+ * Water Channel Subsystem Task
+ * Manages valve control, LCD display, and communication with CUS
+ */
+class WCSTask : public Task {
 public:
-    WCSTask(ServoMotor* pServo, Lcd* pLcd, button* pButton, Potentiometer* pPot);
-    void tick();
+    WCSTask(ServoMotorImpl* pServo, Lcd* pLcd, ButtonImpl* pButton, Potentiometer* pPot, SerialComm* pSerial);
+    
+    void init(int period) override;
+    void tick() override;
 
 private:
-    enum WCSState { AUTOMATIC, LOCAL_MANUAL, REMOTE_MANUAL, UNCONECTED } state;
-
-    void checkUnconnectedMessage();
-    void checkAutomaticMessage();
-    void checkControlMessage();
-    void checkRemoteMessage();
-    void checkLocalMessage();
-    void processPotentiometerInput();
-
-    void setState(WCSState state);
-    bool checkAndSetJustEntered();
-    int msgMotorPerc(String message);
-
-    HWPlatform* pHW;
-
+    // FSM States
+    enum WCSState {
+        AUTOMATIC,      // CUS controls valve automatically
+        MANUAL,         // User controls valve via potentiometer
+        UNCONNECTED     // CUS disconnected
+    };
+    
+    WCSState state;
     bool justEntered;
-    int lastAngle;
-
-    ServoMotor* pServo;
+    
+    // Hardware components
+    ServoMotorImpl* pServo;
     Lcd* pLcd;
-    button* pButton;
+    ButtonImpl* pButton;
     Potentiometer* pPot;
+    SerialComm* pSerial;
+    
+    // State tracking
+    int lastValvePercentage;
+    unsigned long lastPotUpdate;
+    unsigned long lastSerialCheck;
+    
+    // State machine methods
+    void setState(WCSState newState);
+    bool checkAndSetJustEntered();
+    
+    // Message handling
+    void processSerialMessages();
+    void handleValveCommand(const String& value);
+    void handleDisplayUpdate(const String& value);
+    
+    // Mode-specific logic
+    void handleAutomaticMode();
+    void handleManualMode();
+    void handleUnconnectedMode();
+    
+    // Button handling
+    void checkButtonPress();
+    
+    // Potentiometer handling
+    void processPotentiometerInput();
+    
+    // Utilities
+    int mapPercentageToAngle(int percentage);
+    int mapPotToPercentage(int potValue);
+    void updateLCDDisplay(const String& mode, int valve);
 };
 
 #endif

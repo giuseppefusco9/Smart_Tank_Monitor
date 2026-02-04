@@ -4,25 +4,34 @@ Smart Tank Monitoring System
 """
 
 # ====================
-# System Parameters
+# Assignment Parameters
 # ====================
+# These parameters correspond to the assignment specification
 
-# Rainwater level thresholds (in cm)
-L1_THRESHOLD = 30  # Level 1: triggers 50% valve opening after T1 time
-L2_THRESHOLD = 50  # Level 2: triggers immediate 100% valve opening
+# L₁ - First threshold level (cm)
+# When rainwater level exceeds L₁ for T₁ time → valve opens to 50%
+L1_THRESHOLD = 30
 
-# Time thresholds (in seconds)
-T1_TIME = 10  # Time level must stay above L1 before opening valve to 50%
-T2_TIMEOUT = 30  # Timeout for TMS connection before entering UNCONNECTED state
+# L₂ - Second threshold level (cm)
+# When rainwater level exceeds L₂ → valve immediately opens to 100%
+L2_THRESHOLD = 50
 
-# Number of measurements to keep for dashboard graph
+# T₁ - Time delay at L₁ threshold (seconds)
+# How long level must stay above L₁ before opening valve to 50%
+T1_TIME = 10
+
+# T₂ - TMS connection timeout (seconds)
+# Time without TMS data before entering UNCONNECTED state
+T2_TIMEOUT = 30
+
+# N - Number of measurements to keep for dashboard graph
 N_MEASUREMENTS = 100
 
 # ====================
 # MQTT Configuration
 # ====================
 
-MQTT_BROKER = "localhost"
+MQTT_BROKER = "broker.mqtt-dashboard.com"
 MQTT_PORT = 1883
 MQTT_KEEPALIVE = 60
 

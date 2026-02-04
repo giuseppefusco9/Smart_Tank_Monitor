@@ -80,6 +80,13 @@ class MQTTHandler:
             topic = msg.topic
             payload = msg.payload.decode('utf-8')
             
+            # DEBUG: Print raw MQTT message reception
+            print(f"\n{'='*60}")
+            print(f"DEBUG [CUS-MQTT]: Message received from TMS")
+            print(f"  Topic: {topic}")
+            print(f"  Payload: {payload}")
+            print(f"{'='*60}\n")
+            
             logger.debug(f"Received MQTT message on topic '{topic}': {payload}")
             
             if topic == config.MQTT_TOPIC_RAINWATER_LEVEL:
@@ -101,6 +108,9 @@ class MQTTHandler:
             data = json.loads(payload)
             level = float(data['level'])
             timestamp = float(data.get('timestamp', 0))
+            
+            # DEBUG: Print parsed water level data
+            print(f"DEBUG [CUS-MQTT]: Water level parsed - {level} cm (timestamp: {timestamp})")
             
             logger.info(f"Rainwater level received: {level} cm")
             

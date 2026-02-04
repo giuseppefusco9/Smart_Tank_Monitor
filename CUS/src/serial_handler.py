@@ -82,6 +82,12 @@ class SerialHandler:
                     line = self.serial_port.readline().decode('utf-8').strip()
                     
                     if line:
+                        # DEBUG: Print raw serial message from WCS
+                        print(f"\n{'='*60}")
+                        print(f"DEBUG [CUS-SERIAL]: Message received from WCS")
+                        print(f"  Raw Data: {line}")
+                        print(f"{'='*60}\n")
+                        
                         logger.debug(f"Received from WCS: {line}")
                         self._process_message(line)
                 else:
@@ -109,12 +115,16 @@ class SerialHandler:
             
             if msg_type == 'mode':
                 mode = data.get('value', '')
+                # DEBUG: Print mode change from WCS
+                print(f"DEBUG [CUS-SERIAL]: WCS mode changed to: {mode}")
                 logger.info(f"WCS mode change: {mode}")
                 if self.on_mode_change:
                     self.on_mode_change(mode)
             
             elif msg_type == 'valve':
                 opening = int(data.get('value', 0))
+                # DEBUG: Print manual valve change from WCS
+                print(f"DEBUG [CUS-SERIAL]: WCS manual valve set to: {opening}%")
                 logger.info(f"WCS manual valve position: {opening}%")
                 if self.on_manual_valve:
                     self.on_manual_valve(opening)
@@ -162,6 +172,9 @@ class SerialHandler:
             with self._write_lock:
                 self.serial_port.write(message.encode('utf-8'))
                 self.serial_port.flush()
+            
+            # DEBUG: Print valve command sent to WCS
+            print(f"\n--- DEBUG [CUS-SERIAL]: Sending valve command to WCS: {opening}% ---\n")
             
             logger.info(f"Sent valve command to WCS: {opening}%")
             return True

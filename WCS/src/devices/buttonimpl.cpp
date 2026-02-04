@@ -1,17 +1,10 @@
-#ifndef BUTTONIMPL
-#define BUTTONIMPL
+#include "buttonimpl.h"
+#include <Arduino.h>
 
-#include "button.h"
+ButtonImpl::ButtonImpl(int pin) : pin(pin) {
+    pinMode(pin, INPUT);
+}
 
-class ButtonImpl: public button {
- 
-public: 
-  ButtonImpl(int pin);
-  bool isPressed();
-
-private:
-  int pin;
-
-};
-
-#endif
+bool ButtonImpl::isPressed() {
+    return digitalRead(pin) == HIGH;
+}

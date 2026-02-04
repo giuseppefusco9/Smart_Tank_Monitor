@@ -2,28 +2,30 @@
 #define __CONFIG__
 
 // ===== WiFi Configuration =====
-#define WIFI_SSID ""          // Replace with your WiFi SSID
-#define WIFI_PASSWORD ""  // Replace with your WiFi password
+#define WIFI_SSID "iPhone di Giuseppe"          // Replace with your WiFi SSID
+#define WIFI_PASSWORD "giuse2004"  // Replace with your WiFi password
 #define WIFI_TIMEOUT 20000                   // WiFi connection timeout (ms)
 
 // ===== MQTT Configuration =====
-#define MQTT_BROKER "localhost"              // MQTT broker host
+#define MQTT_BROKER "broker.mqtt-dashboard.com"  // MQTT broker host
 #define MQTT_PORT 1883                       // MQTT broker port
 #define MQTT_CLIENT_ID "TMS_ESP32"           // MQTT client ID
-#define MQTT_TOPIC "tank/waterlevel"         // MQTT topic for water level data
+#define MQTT_TOPIC "tms/rainwater/level"    // MQTT topic for water level data
 #define MQTT_USERNAME ""                     // MQTT username (empty if not required)
 #define MQTT_PASSWORD ""                     // MQTT password (empty if not required)
 #define MQTT_RECONNECT_DELAY 5000            // MQTT reconnection delay (ms)
 #define MQTT_MAX_RECONNECT_DELAY 60000       // Maximum reconnection delay (ms)
 
 // ===== Pin Configuration =====
-#define SONAR_TRIG_PIN 7                     // Sonar trigger pin
-#define SONAR_ECHO_PIN 8                     // Sonar echo pin
-#define GREEN_LED_PIN 3                      // Green LED pin (status OK)
-#define RED_LED_PIN 9                        // Red LED pin (network error)
+#define SONAR_TRIG_PIN 13                     // Sonar trigger pin
+#define SONAR_ECHO_PIN 14                     // Sonar echo pin
+#define GREEN_LED_PIN 9                      // Green LED pin (status OK)
+#define RED_LED_PIN 3                        // Red LED pin (network error)
 
 // ===== System Parameters =====
-#define SAMPLING_FREQUENCY 1000              // Water level sampling frequency (ms)
+// F - Sampling frequency (assignment parameter)
+// Water level is sampled at frequency F and sent to CUS
+#define SAMPLING_FREQUENCY 1000              // F = 1 Hz (1000ms period)
 #define TANK_HEIGHT 200.0                    // Tank height in cm
 #define SONAR_TIMEOUT 30000                  // Sonar timeout in microseconds
 #define DISCONNECT_TIMEOUT 10000             // Time to consider disconnected (ms)

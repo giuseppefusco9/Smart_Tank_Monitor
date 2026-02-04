@@ -107,6 +107,12 @@ class HTTPServer:
             try:
                 data = request.get_json()
                 
+                # DEBUG: Print HTTP API mode change request
+                print(f"\n{'='*60}")
+                print(f"DEBUG [CUS-HTTP]: Mode change request from DBS")
+                print(f"  Request Data: {data}")
+                print(f"{'='*60}\n")
+                
                 if not data or 'mode' not in data:
                     return jsonify({'success': False, 'message': 'Missing mode parameter'}), 400
                 
@@ -118,6 +124,7 @@ class HTTPServer:
                 success = self.set_mode(mode)
                 
                 if success:
+                    print(f"DEBUG [CUS-HTTP]: Mode successfully changed to {mode}")
                     logger.info(f"Mode changed to {mode} via API")
                     return jsonify({'success': True, 'message': f'Mode set to {mode}'}), 200
                 else:
@@ -137,6 +144,12 @@ class HTTPServer:
             try:
                 data = request.get_json()
                 
+                # DEBUG: Print HTTP API valve control request
+                print(f"\n{'='*60}")
+                print(f"DEBUG [CUS-HTTP]: Valve control request from DBS")
+                print(f"  Request Data: {data}")
+                print(f"{'='*60}\n")
+                
                 if not data or 'opening' not in data:
                     return jsonify({'success': False, 'message': 'Missing opening parameter'}), 400
                 
@@ -153,6 +166,7 @@ class HTTPServer:
                 success = self.set_valve(opening)
                 
                 if success:
+                    print(f"DEBUG [CUS-HTTP]: Valve successfully set to {opening}%")
                     logger.info(f"Valve opening set to {opening}% via API")
                     return jsonify({'success': True, 'message': f'Valve set to {opening}%'}), 200
                 else:
