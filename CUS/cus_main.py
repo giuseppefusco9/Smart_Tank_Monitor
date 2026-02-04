@@ -174,13 +174,15 @@ class ControlUnitSystem:
     
     def _on_wcs_mode_change(self, mode: str):
         """Callback when WCS reports mode change (from button press)"""
-        logger.info(f"WCS mode change request: {mode}")
+        logger.info(f"WCS reported mode change: {mode}")
         
         # Update business logic
         if self.business_logic.switch_mode(mode):
-            logger.info(f"Mode switched to {mode}")
+            logger.info(f"Mode switched to {mode} successful")
+            # Force a display update back to WCS to confirm the mode change
+            self._update_wcs_display()
         else:
-            logger.warning(f"Failed to switch to mode {mode}")
+            logger.warning(f"Failed to switch to mode {mode} (perhaps already in that mode or unconnected)")
     
     def _on_wcs_manual_valve(self, opening: int):
         """Callback when WCS reports manual valve position change (from potentiometer)"""
@@ -227,11 +229,13 @@ class ControlUnitSystem:
     
     def _on_business_logic_valve_change(self, opening: int):
         """Callback when business logic determines valve opening should change"""
+        logger.debug(f"BusinessLogic triggered valve change to {opening}%")
         # Send command to WCS immediately
         if self.serial_handler.is_connected():
+            logger.info(f"Routing valve command to SerialHandler: {opening}%")
             self.serial_handler.send_valve_command(opening)
         else:
-            logger.debug("Serial handler not connected, skipping immediate valve command")
+            logger.warning("Cannot route valve command: SerialHandler is NOT connected")
     
     # ====================
     # WCS Communication

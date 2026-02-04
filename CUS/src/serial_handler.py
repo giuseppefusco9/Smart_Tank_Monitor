@@ -170,6 +170,8 @@ class SerialHandler:
             }
             message = json.dumps(command) + '\n'
             
+            logger.debug(f"SERIAL WRITE (valve): {message.strip()}")
+            
             # Thread-safe write
             with self._write_lock:
                 self.serial_port.write(message.encode('utf-8'))

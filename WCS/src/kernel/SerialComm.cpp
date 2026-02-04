@@ -89,6 +89,16 @@ void SerialComm::sendMessage(const String& type, int value) {
     doc["value"] = value;
     
     serializeJson(doc, Serial);
-    Serial.println();
+    Serial.println(); // Ensure message is terminated
+    Serial.flush();
+}
+
+void SerialComm::sendMessage(const String& type, const String& value) {
+    JsonDocument doc;
+    doc["type"] = type;
+    doc["value"] = value;
+    
+    serializeJson(doc, Serial);
+    Serial.println(); // Ensure message is terminated
     Serial.flush();
 }

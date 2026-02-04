@@ -133,6 +133,9 @@ void WCSTask::handleValveCommand(const String& value) {
     
     updateLCDDisplay(modeStr, percentage);
     
+    // Send confirmation back to CUS
+    pSerial->sendMessage("status", "Valve set to " + String(percentage) + "%");
+    
     Logger.log("Valve set to " + String(percentage) + "% (angle: " + String(angle) + ")");
 }
 
@@ -162,6 +165,9 @@ void WCSTask::handleDisplayUpdate(const String& value) {
     
     // Force LCD update with latest data
     updateLCDDisplay(modeStr, valveVal);
+    
+    // Send confirmation back to CUS
+    pSerial->sendMessage("status", "Display synced: " + modeStr);
 }
 
 void WCSTask::checkButtonPress() {
