@@ -40,7 +40,10 @@ class ControlUnitSystem:
         self.state_manager = StateManager()
         
         # Initialize business logic
-        self.business_logic = BusinessLogic(self.state_manager)
+        self.business_logic = BusinessLogic(
+            self.state_manager,
+            on_valve_change_callback=self._on_business_logic_valve_change
+        )
         
         # Initialize MQTT handler
         self.mqtt_handler = MQTTHandler(
@@ -193,25 +196,42 @@ class ControlUnitSystem:
     
     def _set_system_mode(self, mode: str) -> bool:
         """Set system mode from HTTP API"""
+        logger.info(f"DBS REQUEST: Switch to mode {mode}")
         success = self.business_logic.switch_mode(mode)
         
         if success:
+            logger.info(f"DBS SUCCESS: Mode switched to {mode}")
             # Update WCS display
             self._update_wcs_display()
+        else:
+            logger.warning(f"DBS FAILURE: Could not switch to mode {mode}")
         
         return success
     
     def _set_manual_valve(self, opening: int) -> bool:
         """Set valve opening from HTTP API (MANUAL mode only)"""
+        logger.info(f"DBS REQUEST: Set manual valve to {opening}%")
         success = self.business_logic.set_manual_valve_opening(opening)
         
         if success:
-            # Send command to WCS
-            self.serial_handler.send_valve_command(opening)
+            logger.info(f"DBS SUCCESS: Manual valve set to {opening}%")
+            # The serial command is already sent via the on_valve_change callback
+            # registered in BusinessLogic, so we don't need to call it explicitly here
+            
             # Update WCS display
             self._update_wcs_display()
+        else:
+            logger.warning(f"DBS FAILURE: Could not set manual valve to {opening}% (check if in MANUAL mode)")
         
         return success
+    
+    def _on_business_logic_valve_change(self, opening: int):
+        """Callback when business logic determines valve opening should change"""
+        # Send command to WCS immediately
+        if self.serial_handler.is_connected():
+            self.serial_handler.send_valve_command(opening)
+        else:
+            logger.debug("Serial handler not connected, skipping immediate valve command")
     
     # ====================
     # WCS Communication

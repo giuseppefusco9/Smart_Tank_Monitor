@@ -19,8 +19,8 @@
 // ===== Pin Configuration =====
 #define SONAR_TRIG_PIN 13                     // Sonar trigger pin
 #define SONAR_ECHO_PIN 14                     // Sonar echo pin
-#define GREEN_LED_PIN 9                      // Green LED pin (status OK)
-#define RED_LED_PIN 3                        // Red LED pin (network error)
+#define GREEN_LED_PIN 18                      // Green LED pin (status OK)
+#define RED_LED_PIN 19                        // Red LED pin (network error)
 
 // ===== System Parameters =====
 // F - Sampling frequency (assignment parameter)

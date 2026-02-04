@@ -33,7 +33,9 @@ void MonitoringTask::tick() {
     DEBUG_PRINT(data.distance);
     DEBUG_PRINTLN(" cm)");
   } else {
-    DEBUG_PRINTLN("Invalid sonar reading");
+    // Helpful debug to see if pulseIn is actually timing out (0) or something else
+    DEBUG_PRINT("Sonar Read Failure. Distance: ");
+    DEBUG_PRINTLN(distance);
   }
 
   if (mqttClient->isConnected()) {

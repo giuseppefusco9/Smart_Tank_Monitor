@@ -9,18 +9,18 @@ void SerialComm::init(unsigned long baudRate) {
 
 void SerialComm::update() {
     while (Serial.available() > 0) {
-        char c = Serial.read();
+        char c = (char)Serial.read();
         
-        if (c == '\n') {
-            // Message complete, ready for parsing
-            return;
-        } else {
-            inputBuffer += c;
-            
-            // Prevent buffer overflow
-            if (inputBuffer.length() >= JSON_BUFFER_SIZE) {
-                inputBuffer = "";  // Reset on overflow
-            }
+        // Skip control characters like \r \n \t if at start of buffer to keep JSON clean
+        if (inputBuffer.length() == 0 && (c == '\n' || c == '\r' || c == '\t' || c == ' ')) {
+            continue;
+        }
+        
+        inputBuffer += c;
+        
+        // Prevent buffer overflow
+        if (inputBuffer.length() >= JSON_BUFFER_SIZE) {
+            inputBuffer = "";  // Reset on overflow
         }
     }
 }
@@ -34,39 +34,52 @@ bool SerialComm::receiveMessage(String& type, String& value) {
         return false;
     }
     
+    // Find the end of the first JSON object
+    int endIdx = inputBuffer.indexOf('}');
+    if (endIdx == -1) return false;
+    
+    // Extract the JSON string
+    String jsonStr = inputBuffer.substring(0, endIdx + 1);
+    
     // Parse JSON
     JsonDocument doc;
-    DeserializationError error = deserializeJson(doc, inputBuffer);
+    DeserializationError error = deserializeJson(doc, jsonStr);
     
     if (error) {
-        // Clear buffer on error
+        // Clear buffer on error to prevent being stuck
         inputBuffer = "";
         return false;
     }
     
     // Extract type (required)
     if (doc["type"].isNull()) {
-        inputBuffer = "";
+        // Remove only this invalid segment
+        inputBuffer = inputBuffer.substring(endIdx + 1);
         return false;
     }
     
     type = doc["type"].as<String>();
     
     // Flexible value extraction
-    if (!doc["value"].isNull()) {
+    if (!doc["mode"].isNull() && !doc["valve"].isNull()) {
+        // Build composite string for display updates: "MODE|VALVE"
+        value = doc["mode"].as<String>() + "|" + doc["valve"].as<String>();
+    } else if (!doc["value"].isNull()) {
         value = doc["value"].as<String>();
     } else if (!doc["mode"].isNull()) {
-        // Support display updates
         value = doc["mode"].as<String>();
     } else if (!doc["valve"].isNull()) {
-        // Support display updates
         value = doc["valve"].as<String>();
     } else {
         value = "";
     }
     
-    // Clear buffer after successful extraction
-    inputBuffer = "";
+    // Remove only the processed message from buffer
+    inputBuffer = inputBuffer.substring(endIdx + 1);
+    
+    // Trim potential leading whitespace/newlines for next message
+    inputBuffer.trim();
+    
     return true;
 }
 

@@ -44,6 +44,17 @@ class Controls {
             this.isUserDraggingSlider = false;
         });
 
+        // Global release listeners to ensure state is reset even if mouse leaves slider
+        const releaseSlider = () => {
+            if (this.isUserDraggingSlider) {
+                this.isUserDraggingSlider = false;
+                console.log('Slider released globally');
+            }
+        };
+
+        window.addEventListener('mouseup', releaseSlider);
+        window.addEventListener('touchend', releaseSlider);
+
         // Apply valve button
         document.getElementById('applyValveBtn').addEventListener('click', () => {
             this.applyValveSetting();

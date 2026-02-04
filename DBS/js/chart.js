@@ -168,4 +168,10 @@ class LevelChart {
 }
 
 // Create global chart instance
+// Register the annotation plugin
+if (window['chartjs-plugin-annotation']) {
+    Chart.register(window['chartjs-plugin-annotation']);
+}
+
+// Create global chart instance
 window.levelChart = null;

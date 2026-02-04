@@ -40,6 +40,7 @@ private:
     
     // State tracking
     int lastValvePercentage;
+    int lastPhysicalPotPercentage;
     unsigned long lastPotUpdate;
     unsigned long lastSerialCheck;
     

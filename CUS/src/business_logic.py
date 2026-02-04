@@ -6,7 +6,7 @@ Implements the core policy for rainwater level monitoring and valve control
 import logging
 import threading
 import time
-from typing import Optional
+from typing import Optional, Callable
 from . import config
 from .state_manager import StateManager
 
@@ -17,8 +17,9 @@ logger = logging.getLogger(__name__)
 class BusinessLogic:
     """Implements business logic for tank monitoring system"""
     
-    def __init__(self, state_manager: StateManager):
+    def __init__(self, state_manager: StateManager, on_valve_change_callback: Optional[Callable[[int], None]] = None):
         self.state = state_manager
+        self.on_valve_change = on_valve_change_callback
         self._running = False
         self._monitor_thread = None
         
@@ -120,6 +121,11 @@ class BusinessLogic:
         """
         if self.state.set_valve_opening(opening):
             logger.info(f"Valve opening set to {opening}%")
+            
+            # Notify external components (like SerialHandler) immediately
+            if self.on_valve_change:
+                self.on_valve_change(opening)
+                
             return True
         else:
             logger.error(f"Invalid valve opening value: {opening}")

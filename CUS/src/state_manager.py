@@ -14,7 +14,7 @@ class StateManager:
     """Thread-safe state manager for the CUS"""
     
     def __init__(self):
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
         
         # System mode
         self._mode = config.DEFAULT_MODE
@@ -94,16 +94,17 @@ class StateManager:
     
     def add_rainwater_level(self, level: float, timestamp: Optional[float] = None):
         """Add a rainwater level measurement"""
+        now = time.time()
         if timestamp is None:
-            timestamp = time.time()
+            timestamp = now
         
         with self._lock:
             self._rainwater_levels.append({
                 'level': level,
                 'timestamp': timestamp
             })
-            self._last_tms_message_time = timestamp
-            self._last_system_update_time = timestamp
+            self._last_tms_message_time = now  # Use local time for timeout check
+            self._last_system_update_time = now # Use local time for system updates
             
             # If we were in UNCONNECTED state and receive data, restore previous mode
             if self._mode == config.MODE_UNCONNECTED:
