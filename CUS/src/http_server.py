@@ -62,7 +62,7 @@ class HTTPServer:
                     'mode': state['mode'],
                     'valve_opening': state['valve_opening'],
                     'latest_level': state.get('latest_level'),
-                    'last_update': state.get('last_tms_message_time'),
+                    'last_update': state.get('last_update'),
                     'l1_threshold': config.L1_THRESHOLD,
                     'l2_threshold': config.L2_THRESHOLD
                 }

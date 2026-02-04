@@ -31,7 +31,7 @@ N_MEASUREMENTS = 100
 # MQTT Configuration
 # ====================
 
-MQTT_BROKER = "broker.mqtt-dashboard.com"
+MQTT_BROKER = "broker.mqtt-dashboard.com"  # MQTT broker host
 MQTT_PORT = 1883
 MQTT_KEEPALIVE = 60
 
@@ -47,7 +47,7 @@ MQTT_CLIENT_ID = "CUS_Controller"
 # Serial Communication
 # ====================
 
-SERIAL_PORT = "COM3"  # Change to /dev/ttyUSB0 or /dev/ttyACM0 on Linux
+SERIAL_PORT = "COM11"
 SERIAL_BAUDRATE = 9600
 SERIAL_TIMEOUT = 1  # seconds
 

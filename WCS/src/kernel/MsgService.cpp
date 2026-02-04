@@ -29,11 +29,14 @@ void MsgServiceClass::init(){
 }
 
 void MsgServiceClass::sendMsg(const String& msg){
-  Serial.println(msg);  
+  // DISABLED: SerialComm handles all serial communication
+  // Serial.println(msg);  
 }
 
+/*
+// DISABLED: SerialComm handles all serial communication now
 void serialEvent() {
-  /* reading the content */
+  // reading the content
   while (Serial.available()) {
     char ch = (char) Serial.read();
     if (ch == '\n'){
@@ -44,6 +47,7 @@ void serialEvent() {
     }
   }
 }
+*/
 
 bool MsgServiceClass::isMsgAvailable(Pattern& pattern){
   return (msgAvailable && pattern.match(*currentMsg));

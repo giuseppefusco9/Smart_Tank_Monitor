@@ -178,20 +178,21 @@ class DashboardApp {
         const valveNumber = document.querySelector('#valveOpening .value-number');
         const valveFill = document.getElementById('valveFill');
         const valveSlider = document.getElementById('valveSlider');
+        const sliderValue = document.getElementById('sliderValue');
 
         valveNumber.textContent = status.valve_opening;
         valveFill.style.width = status.valve_opening + '%';
 
-        // Update slider if not in manual mode
-        if (status.mode !== 'MANUAL') {
+        // Update slider if not currently being dragged by user
+        if (!controls.isUserDraggingSlider) {
             valveSlider.value = status.valve_opening;
-            document.getElementById('sliderValue').textContent = status.valve_opening + '%';
+            sliderValue.textContent = status.valve_opening + '%';
         }
 
         // Update last update time
         if (status.last_update) {
             const date = new Date(status.last_update * 1000);
-            document.getElementById('lastUpdate').textContent = date.toLocaleString('it-IT');
+            document.getElementById('lastUpdate').textContent = date.toLocaleTimeString('it-IT');
         }
     }
 

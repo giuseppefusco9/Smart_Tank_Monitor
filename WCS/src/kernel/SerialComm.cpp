@@ -44,29 +44,30 @@ bool SerialComm::receiveMessage(String& type, String& value) {
         return false;
     }
     
-    // Extract type and value (using ArduinoJson v7 API)
-    if (!doc["type"].isNull() && !doc["value"].isNull()) {
-        type = doc["type"].as<String>();
-        value = doc["value"].as<String>();
-        
-        // Clear buffer after successful parse
+    // Extract type (required)
+    if (doc["type"].isNull()) {
         inputBuffer = "";
-        return true;
+        return false;
     }
     
-    // Clear buffer if format is wrong
-    inputBuffer = "";
-    return false;
-}
-
-void SerialComm::sendMessage(const String& type, const String& value) {
-    JsonDocument doc;
-    doc["type"] = type;
-    doc["value"] = value;
+    type = doc["type"].as<String>();
     
-    serializeJson(doc, Serial);
-    Serial.println();  // Add newline
-    Serial.flush();    // Ensure message is sent
+    // Flexible value extraction
+    if (!doc["value"].isNull()) {
+        value = doc["value"].as<String>();
+    } else if (!doc["mode"].isNull()) {
+        // Support display updates
+        value = doc["mode"].as<String>();
+    } else if (!doc["valve"].isNull()) {
+        // Support display updates
+        value = doc["valve"].as<String>();
+    } else {
+        value = "";
+    }
+    
+    // Clear buffer after successful extraction
+    inputBuffer = "";
+    return true;
 }
 
 void SerialComm::sendMessage(const String& type, int value) {

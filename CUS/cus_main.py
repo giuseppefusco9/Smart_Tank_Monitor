@@ -78,21 +78,25 @@ class ControlUnitSystem:
             self.business_logic.start()
             logger.info("✓ Business logic started")
             
-            # Connect to MQTT broker
-            try:
-                self.mqtt_handler.connect()
-                logger.info("✓ MQTT connected")
-            except Exception as e:
-                logger.error(f"✗ Failed to connect to MQTT broker: {e}")
-                logger.warning("Continuing without MQTT (TMS will be unavailable)")
+            # Connect to subsystems in background threads to avoid blocking HTTP server
+            import threading
             
-            # Connect to serial port
-            try:
-                self.serial_handler.connect()
-                logger.info("✓ Serial port connected")
-            except Exception as e:
-                logger.error(f"✗ Failed to connect to serial port: {e}")
-                logger.warning("Continuing without Serial (WCS will be unavailable)")
+            def connect_mqtt():
+                try:
+                    self.mqtt_handler.connect()
+                    logger.info("✓ MQTT connected")
+                except Exception as e:
+                    logger.error(f"✗ Failed to connect to MQTT broker: {e}")
+            
+            def connect_serial():
+                try:
+                    self.serial_handler.connect()
+                    logger.info("✓ Serial port connected")
+                except Exception as e:
+                    logger.error(f"✗ Failed to connect to serial port: {e}")
+
+            threading.Thread(target=connect_mqtt, daemon=True).start()
+            threading.Thread(target=connect_serial, daemon=True).start()
             
             # Start HTTP server (runs in main thread)
             logger.info("✓ Starting HTTP server...")

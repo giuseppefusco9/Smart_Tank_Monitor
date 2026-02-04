@@ -5,7 +5,7 @@
 WCSTask::WCSTask(ServoMotorImpl* pServo, Lcd* pLcd, ButtonImpl* pButton, Potentiometer* pPot, SerialComm* pSerial)
     : state(AUTOMATIC), justEntered(true),
       pServo(pServo), pLcd(pLcd), pButton(pButton), pPot(pPot), pSerial(pSerial),
-      lastValvePercentage(-1), lastPotUpdate(0), lastSerialCheck(0) {}
+      lastValvePercentage(0), lastPotUpdate(0), lastSerialCheck(0) {}
 
 void WCSTask::init(int period) {
     Task::init(period);
@@ -56,7 +56,7 @@ void WCSTask::handleAutomaticMode() {
         updateLCDDisplay("AUTOMATIC", lastValvePercentage);
         
         // Notify CUS of mode change
-        pSerial->sendMessage("mode", "AUTOMATIC");
+        pSerial->sendMessage("mode", 0);
     }
     
     // In AUTOMATIC mode, we just wait for valve commands from CUS
@@ -69,7 +69,7 @@ void WCSTask::handleManualMode() {
         updateLCDDisplay("MANUAL", lastValvePercentage);
         
         // Notify CUS of mode change
-        pSerial->sendMessage("mode", "MANUAL");
+        pSerial->sendMessage("mode", 1);
     }
     
     // Process potentiometer input

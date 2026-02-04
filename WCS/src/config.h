@@ -7,7 +7,7 @@
 #define POT_PIN A0           // Potentiometer for manual control
 
 // ===== Serial Configuration =====
-#define SERIAL_BAUD 115200   // Match CUS serial configuration
+#define SERIAL_BAUD 9600   // Match CUS serial configuration
 
 // ===== System Parameters =====
 #define VALVE_MIN 0          // Minimum valve percentage

@@ -29,6 +29,9 @@ class StateManager:
         self._last_tms_message_time = None
         self._tms_connected = False
         
+        # Global system update timestamp (for dashboard)
+        self._last_system_update_time = time.time()
+        
         # L1 threshold tracking (for T1 timer)
         self._l1_exceeded_start_time = None
         
@@ -48,6 +51,7 @@ class StateManager:
         
         with self._lock:
             self._mode = mode
+            self._last_system_update_time = time.time()
             return True
     
     def is_automatic_mode(self) -> bool:
@@ -81,6 +85,7 @@ class StateManager:
         
         with self._lock:
             self._valve_opening = opening
+            self._last_system_update_time = time.time()
             return True
     
     # ====================
@@ -98,6 +103,7 @@ class StateManager:
                 'timestamp': timestamp
             })
             self._last_tms_message_time = timestamp
+            self._last_system_update_time = timestamp
             
             # If we were in UNCONNECTED state and receive data, restore previous mode
             if self._mode == config.MODE_UNCONNECTED:
@@ -183,6 +189,7 @@ class StateManager:
                 'valve_opening': self._valve_opening,
                 'rainwater_levels': list(self._rainwater_levels),
                 'latest_level': self._rainwater_levels[-1]['level'] if len(self._rainwater_levels) > 0 else None,
+                'last_update': self._last_system_update_time,
                 'last_tms_message_time': self._last_tms_message_time,
                 'l1_timer_active': self._l1_exceeded_start_time is not None,
                 'l1_timer_duration': self.get_l1_timer_duration()

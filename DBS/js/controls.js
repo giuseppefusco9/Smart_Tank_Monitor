@@ -6,6 +6,7 @@
 class Controls {
     constructor() {
         this.currentMode = 'AUTOMATIC';
+        this.isUserDraggingSlider = false;
         this.setupEventListeners();
     }
 
@@ -25,6 +26,22 @@ class Controls {
 
         slider.addEventListener('input', (e) => {
             sliderValue.textContent = e.target.value + '%';
+        });
+
+        slider.addEventListener('mousedown', () => {
+            this.isUserDraggingSlider = true;
+        });
+
+        slider.addEventListener('mouseup', () => {
+            this.isUserDraggingSlider = false;
+        });
+
+        slider.addEventListener('touchstart', () => {
+            this.isUserDraggingSlider = true;
+        });
+
+        slider.addEventListener('touchend', () => {
+            this.isUserDraggingSlider = false;
         });
 
         // Apply valve button

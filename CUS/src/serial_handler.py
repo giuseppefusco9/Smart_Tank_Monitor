@@ -82,12 +82,6 @@ class SerialHandler:
                     line = self.serial_port.readline().decode('utf-8').strip()
                     
                     if line:
-                        # DEBUG: Print raw serial message from WCS
-                        print(f"\n{'='*60}")
-                        print(f"DEBUG [CUS-SERIAL]: Message received from WCS")
-                        print(f"  Raw Data: {line}")
-                        print(f"{'='*60}\n")
-                        
                         logger.debug(f"Received from WCS: {line}")
                         self._process_message(line)
                 else:
@@ -103,44 +97,52 @@ class SerialHandler:
     def _process_message(self, message: str):
         """
         Process incoming message from WCS
-        
-        Expected message formats:
-        - Mode change: {"type": "mode", "value": "MANUAL"|"AUTOMATIC"}
-        - Manual valve position: {"type": "valve", "value": 0-100}
-        - Status: {"type": "status", "message": "..."}
         """
         try:
             data = json.loads(message)
-            msg_type = data.get('type', 'unknown')
+            if not isinstance(data, dict):
+                logger.debug(f"Received non-object JSON from WCS: {message}")
+                return
+                
+            # Get type safely, ensuring it's a string
+            msg_type = data.get('type')
+            if not isinstance(msg_type, str):
+                logger.debug(f"Message missing 'type' or type is not string: {message}")
+                return
             
             if msg_type == 'mode':
-                mode = data.get('value', '')
-                # DEBUG: Print mode change from WCS
-                print(f"DEBUG [CUS-SERIAL]: WCS mode changed to: {mode}")
+                mode = int(data.get('value', 0))
+                if mode == 0:
+                    mode = "AUTOMATIC"
+                elif mode == 1:
+                    mode = "MANUAL"
+                else:
+                    mode = "Unknown"
                 logger.info(f"WCS mode change: {mode}")
                 if self.on_mode_change:
                     self.on_mode_change(mode)
             
             elif msg_type == 'valve':
-                opening = int(data.get('value', 0))
-                # DEBUG: Print manual valve change from WCS
-                print(f"DEBUG [CUS-SERIAL]: WCS manual valve set to: {opening}%")
-                logger.info(f"WCS manual valve position: {opening}%")
-                if self.on_manual_valve:
-                    self.on_manual_valve(opening)
+                try:
+                    opening = int(data.get('value', 0))
+                    logger.info(f"WCS manual valve position: {opening}%")
+                    if self.on_manual_valve:
+                        self.on_manual_valve(opening)
+                except (ValueError, TypeError):
+                    logger.warning(f"Invalid valve value from WCS: {data.get('value')}")
             
             elif msg_type == 'status':
-                status_msg = data.get('message', '')
+                status_msg = str(data.get('message', ''))
                 logger.info(f"WCS status: {status_msg}")
             
             else:
-                logger.warning(f"Unknown message type from WCS: {msg_type}")
+                logger.debug(f"Unhandled message type from WCS: {msg_type}")
                 
         except json.JSONDecodeError:
-            # Not JSON format - might be plain text status message
-            logger.info(f"WCS message (plain text): {message}")
+            # Not JSON format - ignore
+            logger.debug(f"Non-JSON message from WCS: {message}")
         except Exception as e:
-            logger.error(f"Error processing WCS message: {e}", exc_info=True)
+            logger.error(f"Error processing WCS message: {e}")
     
     def send_valve_command(self, opening: int) -> bool:
         """
@@ -172,9 +174,6 @@ class SerialHandler:
             with self._write_lock:
                 self.serial_port.write(message.encode('utf-8'))
                 self.serial_port.flush()
-            
-            # DEBUG: Print valve command sent to WCS
-            print(f"\n--- DEBUG [CUS-SERIAL]: Sending valve command to WCS: {opening}% ---\n")
             
             logger.info(f"Sent valve command to WCS: {opening}%")
             return True
