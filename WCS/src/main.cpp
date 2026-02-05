@@ -40,6 +40,4 @@ void setup() {
 
 void loop() {
     sched.schedule();
-    
-    delay(10);
 }

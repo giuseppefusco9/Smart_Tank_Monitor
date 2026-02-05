@@ -94,9 +94,6 @@ void initTasks() {
   DEBUG_PRINTLN("Tasks initialization complete");
 }
 
-/**
- * Arduino setup function
- */
 void setup() {
   initHardware();
   initSoftware();
