@@ -122,9 +122,6 @@ void setup() {
   stateManager->setState(CONNECTING);
 }
 
-/**
- * Arduino loop function
- */
 void loop() {
   scheduler->schedule();
   
