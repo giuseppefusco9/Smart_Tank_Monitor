@@ -57,7 +57,7 @@ SERIAL_TIMEOUT = 1  # seconds
 
 HTTP_HOST = "0.0.0.0"  # Listen on all interfaces
 HTTP_PORT = 5000
-HTTP_DEBUG = True  # Set to False in production
+HTTP_DEBUG = True 
 
 # ====================
 # System Modes
@@ -66,8 +66,6 @@ HTTP_DEBUG = True  # Set to False in production
 MODE_AUTOMATIC = "AUTOMATIC"
 MODE_MANUAL = "MANUAL"
 MODE_UNCONNECTED = "UNCONNECTED"
-
-# Default mode on startup
 DEFAULT_MODE = MODE_AUTOMATIC
 
 # ====================
@@ -83,6 +81,5 @@ VALVE_CLOSED = 0  # Valve opening when level < L1
 # ====================
 # Logging
 # ====================
-
-LOG_LEVEL = "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+LOG_LEVEL = "INFO"
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'

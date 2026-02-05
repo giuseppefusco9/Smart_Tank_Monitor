@@ -131,7 +131,7 @@ class Controls {
     }
 
     /**
-     * Update mode from external source (e.g., WCS button press)
+     * Update mode from external source
      */
     setMode(mode) {
         this.currentMode = mode;

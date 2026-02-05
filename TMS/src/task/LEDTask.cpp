@@ -54,7 +54,6 @@ void LEDTask::tick() {
       greenLed->switchOn();
       redLed->switchOff();
       break;
-      break;
 
     case DISCONNECTED:
       greenLed->switchOff();

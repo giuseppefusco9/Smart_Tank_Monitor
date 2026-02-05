@@ -14,6 +14,7 @@ private:
 
     String modeMessage;
     String percMessage;
+    String msg;
 };
 
 #endif

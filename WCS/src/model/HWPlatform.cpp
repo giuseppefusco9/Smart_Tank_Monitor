@@ -1,9 +1,7 @@
 #include "HWPlatform.h"
 #include "devices/buttonimpl.h"
-#include "kernel/MsgService.h"
 #include "devices/servoMotorImpl.h"
 #include "config.h"
-#include "kernel/logger.h"
 #include <Arduino.h>
 
 #define TEST_ANGLE 56
@@ -46,7 +44,7 @@ void HWPlatform::test(){
   }
 
   if(this->getButton()->isPressed()){
-    Logger.log(F("TEST: button"));
+    this->lcd->writeMessage("TEST BUTTON OK");
   }
 
   this->lcd->writeModeMessage("TEST");

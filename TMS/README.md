@@ -37,22 +37,22 @@ The TMS monitors the water level in the rainwater tank using a sonar sensor and 
             └─────┬──────┘
                   │
                   ▼
-            ┌────────────┐     Retry
-            │ CONNECTING │───┐
+            ┌────────────┐     
+            │ CONNECTING │◄──┐
             └─────┬──────┘   │
-                  │          │
+                  │        Retry
           Success │          │
                   ▼          │
             ┌────────────┐   │
-            │ CONNECTED  │   │
-            └─────┬──────┘   │
-                  │          │
-                  ▼          │
-    ┌─────────────┴──────────▼─┐
-    │        MONITORING        │◄──────┐
-    └─────────────┬────────────┘       │
+            │ CONNECTED  │───┘
+            └─────┬──────┘   
+                  │          
+                  ▼          
+    ┌─────────────┴───────────┐
+    │        MONITORING       │◄───────┐
+    └─────────────┬───────────┘        │
                   │                    │
-  Connection Lost │          Reconnected
+  Connection Lost │               Reconnected
                   ▼                    │
             ┌────────────┐             │
             │DISCONNECTED│─────────────┘

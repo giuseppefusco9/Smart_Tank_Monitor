@@ -36,12 +36,12 @@ The WCS controls the valve between the rainwater tank and the water channel, dis
         ┌──────────────┐       │
         │    MANUAL    │───────┘
         └──────────────┘
-               ▲
-               │
-        CUS    │    CUS
-     Timeout   │  Reconnect
-               │
-        ┌──────┴───────┐
+              │ ▲
+              │ │
+        CUS   │ │    CUS
+     Timeout  │ │  Reconnect
+              ▼ │
+        ┌──────────────┐
         │ UNCONNECTED  │
         └──────────────┘
 ```
@@ -73,7 +73,6 @@ WCS/
     ├── kernel/            # Core utilities
     │   ├── Scheduler.h/cpp
     │   ├── Task.h
-    │   ├── Logger.h/cpp
     │   └── SerialComm.h/cpp  # JSON serial handling
     └── tasks/
         └── WCSTask.h/cpp  # Main WCS logic

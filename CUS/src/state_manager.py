@@ -103,10 +103,9 @@ class StateManager:
                 'level': level,
                 'timestamp': timestamp
             })
-            self._last_tms_message_time = now  # Use local time for timeout check
-            self._last_system_update_time = now # Use local time for system updates
+            self._last_tms_message_time = now
+            self._last_system_update_time = now
             
-            # If we were in UNCONNECTED state and receive data, restore previous mode
             if self._mode == config.MODE_UNCONNECTED:
                 self._mode = config.DEFAULT_MODE
     

@@ -22,7 +22,7 @@
 #define SERIAL_CHECK_INTERVAL 50    // ms between serial message checks
 
 // ===== LCD Configuration =====
-#define LCD_I2C_ADDRESS 0x27  // I2C address for LCD (try 0x3F if this doesn't work)
+#define LCD_I2C_ADDRESS 0x27  // I2C address for LCD
 #define LCD_COLS 16           // LCD columns
 #define LCD_ROWS 2            // LCD rows
 

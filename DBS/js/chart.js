@@ -147,7 +147,7 @@ class LevelChart {
         // Update chart
         this.chart.data.labels = labels;
         this.chart.data.datasets[0].data = data;
-        this.chart.update('none'); // Use 'none' mode for smooth updates
+        this.chart.update('none');
     }
 
     /**

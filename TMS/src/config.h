@@ -2,8 +2,8 @@
 #define __CONFIG__
 
 // ===== WiFi Configuration =====
-#define WIFI_SSID "iPhone di Giuseppe"          // Replace with your WiFi SSID
-#define WIFI_PASSWORD "giuse2004"  // Replace with your WiFi password
+#define WIFI_SSID "iPhone di Giuseppe"
+#define WIFI_PASSWORD "giuse2004"
 #define WIFI_TIMEOUT 20000                   // WiFi connection timeout (ms)
 
 // ===== MQTT Configuration =====
@@ -23,8 +23,6 @@
 #define RED_LED_PIN 19                        // Red LED pin (network error)
 
 // ===== System Parameters =====
-// F - Sampling frequency (assignment parameter)
-// Water level is sampled at frequency F and sent to CUS
 #define SAMPLING_FREQUENCY 1000              // F = 1 Hz (1000ms period)
 #define TANK_HEIGHT 200.0                    // Tank height in cm
 #define SONAR_TIMEOUT 30000                  // Sonar timeout in microseconds

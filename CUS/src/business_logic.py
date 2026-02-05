@@ -45,14 +45,11 @@ class BusinessLogic:
         """Main monitoring loop - runs continuously"""
         while self._running:
             try:
-                # Check TMS connection timeout
                 self._check_tms_connection()
                 
-                # Process rainwater level (only in AUTOMATIC mode)
                 if self.state.is_automatic_mode():
                     self._process_rainwater_level()
                 
-                # Sleep briefly to avoid excessive CPU usage
                 time.sleep(0.5)
                 
             except Exception as e:
@@ -62,8 +59,6 @@ class BusinessLogic:
         """Check if TMS has timed out and update state accordingly"""
         if self.state.check_tms_timeout():
             logger.warning(f"TMS timeout detected (no message for {config.T2_TIMEOUT}s) - entering UNCONNECTED state")
-            # In UNCONNECTED state, we might want to close the valve for safety
-            # This is a design decision - adjust as needed
             self.set_valve_opening(config.VALVE_CLOSED)
     
     def _process_rainwater_level(self):
@@ -89,12 +84,8 @@ class BusinessLogic:
         
         # Check L1 threshold (medium priority - requires T1 time)
         if current_level >= config.L1_THRESHOLD:
-            # Level is above L1 but below L2
-            
-            # Start or continue L1 timer
             self.state.start_l1_timer()
             
-            # Check if we've been above L1 for T1 seconds
             if self.state.has_l1_timer_exceeded():
                 logger.info(f"Level {current_level}cm >= L1 ({config.L1_THRESHOLD}cm) for {config.T1_TIME}s - opening valve to 50%")
                 self.set_valve_opening(config.VALVE_L1_OPENING)
@@ -106,7 +97,6 @@ class BusinessLogic:
         
         # Level is below L1 - close valve
         if current_level < config.L1_THRESHOLD:
-            # Reset L1 timer since we're below threshold
             if self.state.get_l1_timer_duration() is not None:
                 logger.info(f"Level {current_level}cm < L1 ({config.L1_THRESHOLD}cm) - closing valve")
                 self.state.reset_l1_timer()
@@ -121,8 +111,7 @@ class BusinessLogic:
         """
         if self.state.set_valve_opening(opening):
             logger.info(f"Valve opening set to {opening}%")
-            
-            # Notify external components (like SerialHandler) immediately
+
             if self.on_valve_change:
                 self.on_valve_change(opening)
                 
@@ -140,11 +129,8 @@ class BusinessLogic:
         
         logger.debug(f"Received rainwater level: {level}cm at {timestamp}")
         
-        # Store the data
         self.state.add_rainwater_level(level, timestamp)
         
-        # If we're in AUTOMATIC mode, trigger immediate processing
-        # (in addition to the monitoring loop)
         if self.state.is_automatic_mode():
             self._process_rainwater_level()
     
@@ -158,8 +144,7 @@ class BusinessLogic:
             return False
         
         old_mode = self.state.get_mode()
-        
-        # Don't switch if in UNCONNECTED state (must wait for TMS to reconnect)
+
         if self.state.is_unconnected():
             logger.warning("Cannot switch mode while in UNCONNECTED state")
             return False
@@ -167,7 +152,6 @@ class BusinessLogic:
         if self.state.set_mode(new_mode):
             logger.info(f"Mode switched from {old_mode} to {new_mode}")
             
-            # When switching to AUTOMATIC, reset L1 timer
             if new_mode == config.MODE_AUTOMATIC:
                 self.state.reset_l1_timer()
             

@@ -21,7 +21,6 @@ public:
     void tick() override;
 
 private:
-    // FSM States
     enum WCSState {
         AUTOMATIC,      // CUS controls valve automatically
         MANUAL,         // User controls valve via potentiometer

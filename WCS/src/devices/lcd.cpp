@@ -15,6 +15,7 @@ Lcd::Lcd() {
     
     modeMessage = "";
     percMessage = "";
+    msg = "";
 }
 
 void Lcd::writeModeMessage(String message) {
@@ -24,6 +25,11 @@ void Lcd::writeModeMessage(String message) {
 
 void Lcd::writePercMessage(String message) {
     percMessage = message;
+    refresh();
+}
+
+void Lcd::writeMessage(String message) {
+    msg = message;
     refresh();
 }
 
@@ -37,4 +43,8 @@ void Lcd::refresh() {
     // Line 2: Percentage message
     lcd.setCursor(0, 1);
     lcd.print(percMessage);
+
+    // Line 3: Message
+    lcd.setCursor(0, 2);
+    lcd.print(msg);
 }

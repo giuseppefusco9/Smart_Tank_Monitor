@@ -1,6 +1,6 @@
 # Smart Tank Monitoring System
 
-An IoT-based solution for real-time monitoring and control of rainwater levels in a tank. The system is composed of four integrated subsystems that communicate via MQTT, Serial, and REST protocols.
+An IoT-based solution for real-time monitoring and control of rainwater levels in a tank. The system is composed of four integrated subsystems that communicate via MQTT, Serial, and HTTP protocols.
 
 ## System Overview
 

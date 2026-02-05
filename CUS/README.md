@@ -59,9 +59,3 @@ CUS/
 ├── pyproject.toml      # Dependency management (uv/hatchling)
 └── uv.lock             # Locked dependencies
 ```
-
-## API Endpoints (DBS)
-
--   `GET /api/status`: Returns current system state (mode, water level, valve opening).
--   `POST /api/mode`: Update system mode (e.g., `{"mode": "MANUAL"}`).
--   `POST /api/valve`: Update manual valve opening (e.g., `{"opening": 50}`).
