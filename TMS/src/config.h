@@ -3,7 +3,7 @@
 
 // ===== WiFi Configuration =====
 #define WIFI_SSID "iPhone di Giuseppe"
-#define WIFI_PASSWORD "giuse2004"
+#define WIFI_PASSWORD "aaaa"
 #define WIFI_TIMEOUT 20000                   // WiFi connection timeout (ms)
 
 // ===== MQTT Configuration =====
