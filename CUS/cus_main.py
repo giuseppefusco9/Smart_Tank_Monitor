@@ -9,6 +9,7 @@ This is the main entry point that coordinates all subsystems:
 """
 
 import logging
+import threading
 import signal
 import sys
 import time
@@ -82,7 +83,6 @@ class ControlUnitSystem:
             logger.info("✓ Business logic started")
             
             # Connect to subsystems in background threads to avoid blocking HTTP server
-            import threading
             
             def connect_mqtt():
                 try:
@@ -106,7 +106,6 @@ class ControlUnitSystem:
             self._running = True
             
             # Start periodic sync with WCS display
-            import threading
             self._sync_thread = threading.Thread(target=self._sync_wcs_display, daemon=True)
             self._sync_thread.start()
             

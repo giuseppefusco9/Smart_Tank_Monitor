@@ -4,6 +4,7 @@ Provides REST API for Dashboard Subsystem (DBS)
 """
 
 import logging
+import threading
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from typing import Callable, Optional
@@ -215,9 +216,7 @@ class HTTPServer:
     def run_async(self):
         """
         Start the HTTP server in a background thread (non-blocking)
-        Note: For production, use a proper WSGI server like gunicorn
         """
-        import threading
         server_thread = threading.Thread(target=self.run, daemon=True)
         server_thread.start()
         logger.info("HTTP server started in background thread")

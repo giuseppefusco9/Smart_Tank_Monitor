@@ -56,12 +56,9 @@ class MQTTHandler:
             logger.info("Connected to MQTT broker successfully")
             self._connected = True
             
-            # Subscribe to topics
+            # Subscribe to topics for receiving data from TMS
             self.client.subscribe(config.MQTT_TOPIC_RAINWATER_LEVEL)
             logger.info(f"Subscribed to topic: {config.MQTT_TOPIC_RAINWATER_LEVEL}")
-            
-            self.client.subscribe(config.MQTT_TOPIC_TMS_STATUS)
-            logger.info(f"Subscribed to topic: {config.MQTT_TOPIC_TMS_STATUS}")
         else:
             logger.error(f"Failed to connect to MQTT broker, return code: {rc}")
             self._connected = False
@@ -91,8 +88,6 @@ class MQTTHandler:
             
             if topic == config.MQTT_TOPIC_RAINWATER_LEVEL:
                 self._handle_rainwater_level(payload)
-            elif topic == config.MQTT_TOPIC_TMS_STATUS:
-                self._handle_tms_status(payload)
             else:
                 logger.warning(f"Received message on unknown topic: {topic}")
                 
@@ -123,35 +118,6 @@ class MQTTHandler:
             
         except (json.JSONDecodeError, KeyError, ValueError) as e:
             logger.error(f"Invalid rainwater level data format: {payload} - {e}")
-    
-    def _handle_tms_status(self, payload: str):
-        """
-        Handle status updates from TMS
-        Expected format: {"status": "connected"|"disconnected"|"error", "message": "..."}
-        """
-        try:
-            data = json.loads(payload)
-            status = data.get('status', 'unknown')
-            message = data.get('message', '')
-            
-            logger.info(f"TMS status update: {status} - {message}")
-            
-        except json.JSONDecodeError as e:
-            logger.error(f"Invalid TMS status data format: {payload} - {e}")
-    
-    def _send_acknowledgment(self, level: float, timestamp: float):
-        """Send acknowledgment to TMS (optional feature)"""
-        try:
-            ack_data = {
-                'received_level': level,
-                'received_timestamp': timestamp,
-                'status': 'ok'
-            }
-            payload = json.dumps(ack_data)
-            self.client.publish(config.MQTT_TOPIC_CUS_ACK, payload)
-            logger.debug(f"Sent acknowledgment: {payload}")
-        except Exception as e:
-            logger.error(f"Failed to send acknowledgment: {e}")
     
     def is_connected(self) -> bool:
         """Check if connected to MQTT broker"""

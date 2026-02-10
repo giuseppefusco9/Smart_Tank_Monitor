@@ -37,8 +37,6 @@ MQTT_KEEPALIVE = 60
 
 # MQTT Topics
 MQTT_TOPIC_RAINWATER_LEVEL = "tms/rainwater/level"  # Subscribe: receive level data from TMS
-MQTT_TOPIC_TMS_STATUS = "tms/status"  # Subscribe: TMS status updates
-MQTT_TOPIC_CUS_ACK = "cus/ack"  # Publish: acknowledgments to TMS
 
 # MQTT Client ID
 MQTT_CLIENT_ID = "CUS_Controller"
