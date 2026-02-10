@@ -10,7 +10,6 @@
 #include "task/MQTTTask.h"
 #include "task/LEDTask.h"
 
-// ===== Global Objects =====
 Sonar* sonar;
 Led* greenLed;
 Led* redLed;
@@ -18,7 +17,6 @@ StateManager* stateManager;
 MQTTClient* mqttClient;
 Scheduler* scheduler;
 
-// ===== Tasks =====
 MonitoringTask* monitoringTask;
 MQTTTask* mqttTask;
 LEDTask* ledTask;
@@ -30,7 +28,6 @@ void initHardware() {
   DEBUG_PRINTLN("=== Initializing Hardware ===");
   
   Serial.begin(SERIAL_BAUD_RATE);
-  delay(1000);
   DEBUG_PRINTLN("Serial initialized");
 
   sonar = new Sonar(SONAR_ECHO_PIN, SONAR_TRIG_PIN, SONAR_TIMEOUT);
@@ -39,13 +36,6 @@ void initHardware() {
   greenLed = new Led(GREEN_LED_PIN);
   redLed = new Led(RED_LED_PIN);
   DEBUG_PRINTLN("LEDs initialized");
-  DEBUG_PRINTLN("Testing LEDs...");
-  greenLed->switchOn();
-  delay(300);
-  greenLed->switchOff();
-  redLed->switchOn();
-  delay(300);
-  redLed->switchOff();
 
   DEBUG_PRINTLN("Hardware initialization complete");
 }
@@ -121,8 +111,6 @@ void setup() {
 
 void loop() {
   scheduler->schedule();
-  
-  delay(scheduler->getBasePeriod());
 
   static unsigned long lastStatusPrint = 0;
   unsigned long now = millis();

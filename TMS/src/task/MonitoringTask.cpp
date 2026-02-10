@@ -40,15 +40,14 @@ void MonitoringTask::tick() {
   if (mqttClient->isConnected()) {
     String jsonData = data.toJson();
     
-    // DEBUG: Print MQTT publish to CUS
-    Serial.println("\n===========================");
-    Serial.println("DEBUG [TMS-MQTT]: Publishing to CUS");
-    Serial.print("  Level: ");
-    Serial.print(data.level);
-    Serial.println(" cm");
-    Serial.print("  JSON: ");
-    Serial.println(jsonData);
-    Serial.println("===========================\n");
+    DEBUG_PRINTLN("\n===========================");
+    DEBUG_PRINTLN("DEBUG [TMS-MQTT]: Publishing to CUS");
+    DEBUG_PRINT("  Level: ");
+    DEBUG_PRINT(data.level);
+    DEBUG_PRINTLN(" cm");
+    DEBUG_PRINT("  JSON: ");
+    DEBUG_PRINTLN(jsonData);
+    DEBUG_PRINTLN("===========================\n");
     
     bool published = mqttClient->publish(MQTT_TOPIC, jsonData);
     
