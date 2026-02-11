@@ -15,16 +15,7 @@ enum TMSState {
 /**
  * Convert state to string for debugging and logging
  */
-inline const char* stateToString(TMSState state) {
-  switch (state) {
-    case INIT:         return "INIT";
-    case CONNECTING:   return "CONNECTING";
-    case CONNECTED:    return "CONNECTED";
-    case MONITORING:   return "MONITORING";
-    case DISCONNECTED: return "DISCONNECTED";
-    default:           return "UNKNOWN";
-  }
-}
+const char* stateToString(TMSState state);
 
 /**
  * State Manager Class
@@ -36,52 +27,37 @@ private:
   unsigned long lastTransitionTime;
 
 public:
-  StateManager() : currentState(INIT), lastTransitionTime(0) {}
+  StateManager();
 
   /**
    * Get current state
    */
-  TMSState getState() const {
-    return currentState;
-  }
+  TMSState getState() const;
 
   /**
    * Set new state and record transition time
    */
-  void setState(TMSState newState) {
-    if (currentState != newState) {
-      currentState = newState;
-      lastTransitionTime = millis();
-    }
-  }
+  void setState(TMSState newState);
 
   /**
    * Get time elapsed in current state (ms)
    */
-  unsigned long getTimeInState() const {
-    return millis() - lastTransitionTime;
-  }
+  unsigned long getTimeInState() const;
 
   /**
    * Check if in normal operating state
    */
-  bool isOperational() const {
-    return currentState == MONITORING;
-  }
+  bool isOperational() const;
 
   /**
    * Check if network is available
    */
-  bool isConnected() const {
-    return currentState == CONNECTED || currentState == MONITORING;
-  }
+  bool isConnected() const;
 
   /**
    * Check if in error state
    */
-  bool isError() const {
-    return currentState == DISCONNECTED;
-  }
+  bool isError() const;
 };
 
 #endif
