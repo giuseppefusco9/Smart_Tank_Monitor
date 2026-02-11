@@ -144,8 +144,6 @@ void WCSTask::checkButtonPress() {
         } else if (state == MANUAL) {
             setState(AUTOMATIC);
         }
-        
-        delay(200);
     }
 }
 
