@@ -2,42 +2,30 @@
 #include "config.h"
 #include "kernel/Scheduler.h"
 #include "kernel/SerialComm.h"
-#include "devices/servoMotorImpl.h"
-#include "devices/lcd.h"
-#include "devices/buttonimpl.h"
-#include "devices/pot.h"
+#include "model/HWPlatform.h"
 #include "tasks/WCSTask.h"
 
 // Global objects
-Scheduler sched;
-SerialComm serialComm;
-
-// Hardware components
-ServoMotorImpl* pServo;
-Lcd* pLcd;
-ButtonImpl* pButton;
-Potentiometer* pPot;
+Scheduler* sched;
+SerialComm* serialComm;
+HWPlatform* hw;
 
 // Task
 WCSTask* wcsTask;
 
 void setup() {
-    serialComm.init(SERIAL_BAUD);
+    serialComm = new SerialComm();
+    hw = new HWPlatform();
+    sched = new Scheduler();
+
+    serialComm->init(SERIAL_BAUD);
+    sched->init(50);
     
-    pServo = new ServoMotorImpl(SERVO_PIN);
-    pServo->on();
-    
-    pLcd = new Lcd();
-    pButton = new ButtonImpl(BUTTON_PIN);
-    pPot = new Potentiometer(POT_PIN);
-    
-    sched.init(50);
-    
-    wcsTask = new WCSTask(pServo, pLcd, pButton, pPot, &serialComm);
+    wcsTask = new WCSTask(hw, serialComm);
     wcsTask->init(100);
-    sched.addTask(wcsTask);
+    sched->addTask(wcsTask);
 }
 
 void loop() {
-    sched.schedule();
+    sched->schedule();
 }

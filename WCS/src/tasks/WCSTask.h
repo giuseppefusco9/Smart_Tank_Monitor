@@ -3,10 +3,7 @@
 
 #include "kernel/Task.h"
 #include "kernel/SerialComm.h"
-#include "devices/servoMotorImpl.h"
-#include "devices/lcd.h"
-#include "devices/buttonimpl.h"
-#include "devices/pot.h"
+#include "model/HWPlatform.h"
 #include <Arduino.h>
 
 /**
@@ -15,7 +12,7 @@
  */
 class WCSTask : public Task {
 public:
-    WCSTask(ServoMotorImpl* pServo, Lcd* pLcd, ButtonImpl* pButton, Potentiometer* pPot, SerialComm* pSerial);
+    WCSTask(HWPlatform* pHW, SerialComm* pSerial);
     
     void init(int period) override;
     void tick() override;
@@ -31,10 +28,7 @@ private:
     bool justEntered;
     
     // Hardware components
-    ServoMotorImpl* pServo;
-    Lcd* pLcd;
-    ButtonImpl* pButton;
-    Potentiometer* pPot;
+    HWPlatform* pHW;
     SerialComm* pSerial;
     
     // State tracking

@@ -1,9 +1,9 @@
 #include "WCSTask.h"
 #include "config.h"
 
-WCSTask::WCSTask(ServoMotorImpl* pServo, Lcd* pLcd, ButtonImpl* pButton, Potentiometer* pPot, SerialComm* pSerial)
+WCSTask::WCSTask(HWPlatform* pHW, SerialComm* pSerial)
     : state(AUTOMATIC), justEntered(true),
-      pServo(pServo), pLcd(pLcd), pButton(pButton), pPot(pPot), pSerial(pSerial),
+      pHW(pHW), pSerial(pSerial),
       lastValvePercentage(0), lastPotUpdate(0), lastSerialCheck(0) {}
 
 void WCSTask::init(int period) {
@@ -13,8 +13,8 @@ void WCSTask::init(int period) {
     
     setState(AUTOMATIC);
     
-    pPot->sync();
-    lastPhysicalPotPercentage = mapPotToPercentage(pPot->getValue());
+    pHW->getPot()->sync();
+    lastPhysicalPotPercentage = mapPotToPercentage(pHW->getPot()->getValue());
 }
 
 void WCSTask::tick() {
@@ -69,7 +69,7 @@ void WCSTask::handleUnconnectedMode() {
     if (checkAndSetJustEntered()) {
         updateLCDDisplay("UNCONNECTED", 0);
         
-        pServo->setPosition(0);
+        pHW->getMotor()->setPosition(0);
         lastValvePercentage = 0;
     }
 }
@@ -97,7 +97,7 @@ void WCSTask::handleValveCommand(const String& value) {
     }
     
     int angle = mapPercentageToAngle(percentage);
-    pServo->setPosition(angle);
+    pHW->getMotor()->setPosition(angle);
     lastValvePercentage = percentage;
     
     String modeStr = "UNKNOWN";
@@ -130,7 +130,7 @@ void WCSTask::handleDisplayUpdate(const String& value) {
     }
     
     int angle = mapPercentageToAngle(valveVal);
-    pServo->setPosition(angle);
+    pHW->getMotor()->setPosition(angle);
     
     updateLCDDisplay(modeStr, valveVal);
     
@@ -138,7 +138,7 @@ void WCSTask::handleDisplayUpdate(const String& value) {
 }
 
 void WCSTask::checkButtonPress() {
-    if (pButton->isPressed()) {
+    if (pHW->getButton()->isPressed()) {
         if (state == AUTOMATIC) {
             setState(MANUAL);
         } else if (state == MANUAL) {
@@ -150,8 +150,8 @@ void WCSTask::checkButtonPress() {
 }
 
 void WCSTask::processPotentiometerInput() {
-    pPot->sync();
-    int potValue = pPot->getValue();
+    pHW->getPot()->sync();
+    int potValue = pHW->getPot()->getValue();
     
     int percentage = mapPotToPercentage(potValue);
     
@@ -162,7 +162,7 @@ void WCSTask::processPotentiometerInput() {
         
         if (percentage != lastValvePercentage) {
             int angle = mapPercentageToAngle(percentage);
-            pServo->setPosition(angle);
+            pHW->getMotor()->setPosition(angle);
             lastValvePercentage = percentage;
             
             updateLCDDisplay("MANUAL", percentage);
@@ -192,8 +192,8 @@ int WCSTask::mapPotToPercentage(int potValue) {
 }
 
 void WCSTask::updateLCDDisplay(const String& mode, int valve) {
-    pLcd->writeModeMessage(mode);
+    pHW->getLCD()->writeModeMessage(mode);
     
     String valveStr = "Valve: " + String(valve) + "%";
-    pLcd->writePercMessage(valveStr);
+    pHW->getLCD()->writePercMessage(valveStr);
 }

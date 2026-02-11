@@ -9,6 +9,7 @@ public:
     Lcd();
     void writeModeMessage(String message);
     void writePercMessage(String message);
+    void writeMessage(String message);
 private:
     void refresh();
 
