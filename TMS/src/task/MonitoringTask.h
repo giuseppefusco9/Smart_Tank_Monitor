@@ -2,7 +2,7 @@
 #define __MONITORING_TASK__
 
 #include "kernel/Task.h"
-#include "devices/Sonar.h"
+#include "model/HWPlatform.h"
 #include "model/WaterLevelData.h"
 #include "model/TMSState.h"
 #include "kernel/MQTTClient.h"
@@ -14,13 +14,13 @@
  */
 class MonitoringTask : public Task {
 private:
-  Sonar* sonar;
+  HWPlatform* hw;
   MQTTClient* mqttClient;
   StateManager* stateManager;
   WaterLevelData lastReading;
 
 public:
-  MonitoringTask(Sonar* sonar, MQTTClient* mqttClient, StateManager* stateManager);
+  MonitoringTask(HWPlatform* hw, MQTTClient* mqttClient, StateManager* stateManager);
   
   void init(int period);
 

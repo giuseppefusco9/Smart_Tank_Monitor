@@ -57,7 +57,7 @@ void initSoftware() {
 void initTasks() {
   DEBUG_PRINTLN("=== Initializing Tasks ===");
 
-  monitoringTask = new MonitoringTask(sonar, mqttClient, stateManager);
+  monitoringTask = new MonitoringTask(hw, mqttClient, stateManager);
   mqttTask = new MQTTTask(mqttClient, stateManager);
   ledTask = new LEDTask(greenLed, redLed, stateManager);
   monitoringTask->init(MONITORING_TASK_PERIOD);

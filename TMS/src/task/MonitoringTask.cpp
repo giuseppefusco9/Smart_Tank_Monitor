@@ -1,8 +1,8 @@
 #include "Arduino.h"
 #include "MonitoringTask.h"
 
-MonitoringTask::MonitoringTask(Sonar* sonar, MQTTClient* mqttClient, StateManager* stateManager) 
-  : sonar(sonar), mqttClient(mqttClient), stateManager(stateManager) {
+MonitoringTask::MonitoringTask(HWPlatform* hw, MQTTClient* mqttClient, StateManager* stateManager) 
+  : hw(hw), mqttClient(mqttClient), stateManager(stateManager) {
   lastReading = WaterLevelData::invalid();
 }
 
@@ -16,7 +16,7 @@ void MonitoringTask::tick() {
     return;
   }
 
-  float distance = sonar->getDistance();
+  float distance = hw->getSonar()->getDistance();
   
   WaterLevelData data;
   data.distance = distance;
