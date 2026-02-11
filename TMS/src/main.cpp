@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include "config.h"
-#include "devices/Sonar.h"
-#include "devices/Led.h"
+#include "model/HWPlatform.h"
 #include "model/TMSState.h"
 #include "model/WaterLevelData.h"
 #include "kernel/MQTTClient.h"
@@ -10,12 +9,10 @@
 #include "task/MQTTTask.h"
 #include "task/LEDTask.h"
 
-Sonar* sonar;
-Led* greenLed;
-Led* redLed;
 StateManager* stateManager;
 MQTTClient* mqttClient;
 Scheduler* scheduler;
+HWPlatform* hw;
 
 MonitoringTask* monitoringTask;
 MQTTTask* mqttTask;
@@ -26,17 +23,10 @@ LEDTask* ledTask;
  */
 void initHardware() {
   DEBUG_PRINTLN("=== Initializing Hardware ===");
-  
+
   Serial.begin(SERIAL_BAUD_RATE);
-  DEBUG_PRINTLN("Serial initialized");
 
-  sonar = new Sonar(SONAR_ECHO_PIN, SONAR_TRIG_PIN, SONAR_TIMEOUT);
-  DEBUG_PRINTLN("Sonar initialized");
-
-  greenLed = new Led(GREEN_LED_PIN);
-  redLed = new Led(RED_LED_PIN);
-  DEBUG_PRINTLN("LEDs initialized");
-
+  hw = new HWPlatform();
   DEBUG_PRINTLN("Hardware initialization complete");
 }
 
@@ -126,7 +116,7 @@ void loop() {
     DEBUG_PRINT(now / 1000);
     DEBUG_PRINTLN(" seconds");
     
-    float distance = sonar->getDistance();
+    float distance = hw->getSonar()->getDistance();
     if (distance >= 0) {
       float level = TANK_HEIGHT - distance;
       DEBUG_PRINT("Current Water Level: ");
