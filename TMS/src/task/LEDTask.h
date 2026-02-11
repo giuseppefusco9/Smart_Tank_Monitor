@@ -2,7 +2,7 @@
 #define __LED_TASK__
 
 #include "kernel/Task.h"
-#include "devices/Led.h"
+#include "model/HWPlatform.h"
 #include "model/TMSState.h"
 #include "config.h"
 
@@ -12,14 +12,13 @@
  */
 class LEDTask : public Task {
 private:
-  Led* greenLed;
-  Led* redLed;
+  HWPlatform* hw;
   StateManager* stateManager;
   bool blinkState;
   unsigned long lastBlinkTime;
 
 public:
-  LEDTask(Led* greenLed, Led* redLed, StateManager* stateManager);
+  LEDTask(HWPlatform* hw, StateManager* stateManager);
   
   void init(int period);
   void tick();

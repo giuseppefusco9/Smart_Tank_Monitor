@@ -1,16 +1,16 @@
 #include "Arduino.h"
 #include "LEDTask.h"
 
-LEDTask::LEDTask(Led* greenLed, Led* redLed, StateManager* stateManager) 
-  : greenLed(greenLed), redLed(redLed), stateManager(stateManager),
+LEDTask::LEDTask(HWPlatform* hw, StateManager* stateManager) 
+  : hw(hw), stateManager(stateManager),
     blinkState(false), lastBlinkTime(0) {
 }
 
 void LEDTask::init(int period) {
   Task::init(period);
   DEBUG_PRINTLN("LEDTask initialized");
-  greenLed->switchOff();
-  redLed->switchOff();
+  hw->getGreenLed()->switchOff();
+  hw->getRedLed()->switchOff();
 }
 
 void LEDTask::tick() {
@@ -30,49 +30,49 @@ void LEDTask::tick() {
       if (now - lastBlinkTime >= LED_BLINK_PERIOD) {
         blinkState = !blinkState;
         if (blinkState) {
-          greenLed->switchOn();
-          redLed->switchOn();
+          hw->getGreenLed()->switchOn();
+          hw->getRedLed()->switchOn();
         } else {
-          greenLed->switchOff();
-          redLed->switchOff();
+          hw->getGreenLed()->switchOff();
+          hw->getRedLed()->switchOff();
         }
         lastBlinkTime = now;
       }
       break;
 
     case CONNECTING:
-      greenLed->switchOff();
-      redLed->switchOn();
+      hw->getGreenLed()->switchOff();
+      hw->getRedLed()->switchOn();
       break;
 
     case CONNECTED:
-      greenLed->switchOn();
-      redLed->switchOff();
+      hw->getGreenLed()->switchOn();
+      hw->getRedLed()->switchOff();
       break;
 
     case MONITORING:
-      greenLed->switchOn();
-      redLed->switchOff();
+      hw->getGreenLed()->switchOn();
+      hw->getRedLed()->switchOff();
       break;
 
     case DISCONNECTED:
-      greenLed->switchOff();
-      redLed->switchOn();
+      hw->getGreenLed()->switchOff();
+      hw->getRedLed()->switchOn();
       break;
 
     default:
-      greenLed->switchOff();
-      redLed->switchOff();
+      hw->getGreenLed()->switchOff();
+      hw->getRedLed()->switchOff();
       break;
   }
 }
 
 void LEDTask::allOff() {
-  greenLed->switchOff();
-  redLed->switchOff();
+  hw->getGreenLed()->switchOff();
+  hw->getRedLed()->switchOff();
 }
 
 void LEDTask::allOn() {
-  greenLed->switchOn();
-  redLed->switchOn();
+  hw->getGreenLed()->switchOn();
+  hw->getRedLed()->switchOn();
 }

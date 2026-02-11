@@ -59,7 +59,7 @@ void initTasks() {
 
   monitoringTask = new MonitoringTask(hw, mqttClient, stateManager);
   mqttTask = new MQTTTask(mqttClient, stateManager);
-  ledTask = new LEDTask(greenLed, redLed, stateManager);
+  ledTask = new LEDTask(hw, stateManager);
   monitoringTask->init(MONITORING_TASK_PERIOD);
   mqttTask->init(MQTT_TASK_PERIOD);
   ledTask->init(LED_TASK_PERIOD);
